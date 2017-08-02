@@ -1,0 +1,123 @@
+var page = require('webpage').create();
+var fs = require('fs');
+
+var before_start_interval_id;
+var login_button;
+var ready_to_act = false;
+
+page.viewportSize = {
+    width: 600,
+    height: 800
+};
+
+page.open('http://play.pokemonshowdown.com', function(status) {
+    console.log("Status: " + status);
+    setInterval(function() {
+        page.render('loading.png');
+        fs.remove('live.png');
+        fs.move('loading.png', 'live.png');
+    }, 150);
+    if(status === "success") {
+
+        before_start_interval_id = setInterval(function() {
+            login_button = page.evaluate(function() {
+                login_button = document.getElementsByName('login');
+                if (login_button !== [] && login_button.length !== 0) {
+                    login_button = login_button[0];
+                    return login_button;
+                }
+                return null;
+            });
+            if (login_button) {
+                clearInterval(before_start_interval_id);
+                page.evaluate(function () {
+                    login_button.click();
+                    document.getElementsByName('username')[0].value = 'IAtalove';
+                    document.getElementsByClassName('buttonbar')[0].children[0].click();
+                });
+                setTimeout(function() {
+
+                    page.evaluate(function () {
+                        // search user
+                        document.getElementsByName('finduser')[0].click();
+                        document.getElementsByName('data')[0].value = 'Marowak OP';
+                        document.getElementsByClassName('buttonbar')[0].children[0].click();
+
+                        // click "chat"
+                        document.getElementsByClassName('ps-popup')[0].children[1].children[1].click();
+
+                        // type message
+                        document.getElementsByName('message')[0].value = 'Olá!';
+                    });
+                    // press Return key
+                    page.sendEvent('keypress', page.event.key.Return, [null, null, 0]);
+
+                    page.evaluate(function () {
+                        // search user
+                        document.getElementsByName('finduser')[0].click();
+                        document.getElementsByName('data')[0].value = 'Marowak OP';
+                        document.getElementsByClassName('buttonbar')[0].children[0].click();
+
+                        // click "challenge"
+                        document.getElementsByClassName('ps-popup')[0].children[1].children[0].click();
+
+                        // click "challenge" again
+                        document.getElementsByName('makeChallenge')[0].click();
+                    });
+
+                    page.onUrlChanged = function () {
+                        setInterval(function() {
+
+                            // skip animations
+                            can_skip = page.evaluate(function () {
+                                var result = document.getElementsByName('goToEnd');
+                                if (result.length !== 0)
+                                {
+                                    return document.getElementsByName('goToEnd')[0].getBoundingClientRect();
+                                }
+                                return null;
+                            });
+                            if (can_skip !== null)
+                            {
+                                page.sendEvent('click', can_skip.left + can_skip.width / 2, can_skip.top + can_skip.height / 2);
+                            }
+
+                            // check if there's any available action
+                            action = page.evaluate(function() {
+                                var moves = document.getElementsByName('chooseMove');
+                                if (moves.length !== 0)
+                                {
+                                    return 'attack';
+                                }
+                                var switchs = document.getElementsByName('chooseSwitch');
+                                if (switchs.length !== 0)
+                                {
+                                    return 'switch';
+                                }
+                                return 'nothing';
+                            });
+                            // uses a random available move
+                            if (action === 'attack')
+                            {
+                                var rect = page.evaluate(function() {
+                                    var moves = document.getElementsByName('chooseMove');
+                                    return moves[Math.floor(Math.random() * moves.length)].getBoundingClientRect();
+                                });
+                                page.sendEvent('click', rect.left + rect.width / 2, rect.top + rect.height / 2);
+                            }
+                            // switchs to a random available pokemon
+                            else if (action === 'switch')
+                            {
+                                var rect = page.evaluate(function() {
+                                    var switchs = document.getElementsByName('chooseSwitch');
+                                    return switchs[Math.floor(Math.random() * switchs.length)].getBoundingClientRect();
+                                });
+                                page.sendEvent('click', rect.left + rect.width / 2, rect.top + rect.height / 2);
+                            }
+                        }, 400);
+                    };
+                }, 3000);
+            }
+        }, 50);
+    }
+});
