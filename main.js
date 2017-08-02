@@ -5,6 +5,9 @@ var before_start_interval_id;
 var login_button;
 var ready_to_act = false;
 
+var AI_name = 'IAtalove';
+var player_to_challenge = '<insert name here>';
+
 page.viewportSize = {
     width: 600,
     height: 800
@@ -32,7 +35,7 @@ page.open('http://play.pokemonshowdown.com', function(status) {
                 clearInterval(before_start_interval_id);
                 page.evaluate(function () {
                     login_button.click();
-                    document.getElementsByName('username')[0].value = 'IAtalove';
+                    document.getElementsByName('username')[0].value = AI_name;
                     document.getElementsByClassName('buttonbar')[0].children[0].click();
                 });
                 setTimeout(function() {
@@ -40,7 +43,7 @@ page.open('http://play.pokemonshowdown.com', function(status) {
                     page.evaluate(function () {
                         // search user
                         document.getElementsByName('finduser')[0].click();
-                        document.getElementsByName('data')[0].value = 'Marowak OP';
+                        document.getElementsByName('data')[0].value = player_to_challenge;
                         document.getElementsByClassName('buttonbar')[0].children[0].click();
 
                         // click "chat"
@@ -55,7 +58,7 @@ page.open('http://play.pokemonshowdown.com', function(status) {
                     page.evaluate(function () {
                         // search user
                         document.getElementsByName('finduser')[0].click();
-                        document.getElementsByName('data')[0].value = 'Marowak OP';
+                        document.getElementsByName('data')[0].value = player_to_challenge;
                         document.getElementsByClassName('buttonbar')[0].children[0].click();
 
                         // click "challenge"
