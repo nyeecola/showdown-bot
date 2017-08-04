@@ -15,25 +15,19 @@ page.viewportSize = {
 
 page.open('http://play.pokemonshowdown.com', function(status) {
     console.log("Status: " + status);
-    page.onConsoleMessage = function(msg) {
-        if(msg.indexOf('|request|') !== -1){
-            var json = msg.substr(msg.indexOf('|request|') +9);
-            json = JSON.parse(json);
-        }
+    page.onConsoleMessage = function() {
+        console.log("page.onConsoleMessage");
         printArgs.apply(this, arguments);
     };
-
     page.evaluate(function(name, player){
         this.AI_name = name;
         this.player_to_challenge = player;
     }, AI_name, player_to_challenge);
-
     setInterval(function() {
         page.render('loading.png');
         fs.remove('live.png');
         fs.move('loading.png', 'live.png');
     }, 150);
-
     if(status === "success") {
         before_start_interval_id = setInterval(function() {
             login_button = page.evaluate(function() {
@@ -131,7 +125,7 @@ page.open('http://play.pokemonshowdown.com', function(status) {
                             }
                         }, 400);
                     };
-                }, 4000);
+                }, 3000);
             }
         }, 50);
     }
